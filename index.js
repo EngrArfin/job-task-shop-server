@@ -28,6 +28,7 @@ async function run() {
 
     const productColletion = client.db("productSP").collection("product");
     const productCategoryColletion = client.db("productSP").collection("productCategory");
+    const cabCategoryColletion = client.db("productSP").collection("cabs");
     
     app.get('/product', async(req, res) =>{
         const result = await productColletion.find().toArray();
@@ -37,6 +38,15 @@ async function run() {
     app.get('/productCategory', async(req, res) =>{
         const result = await productCategoryColletion.find().toArray();
         res.send(result);
+    })
+
+/* Cab Data Collection For next page */
+
+    app.post('/cabs', async(req, res) =>{
+      const item = req.body;
+      console.log(item);
+      const result = await cabCategoryColletion.insertOne(item);
+      res.send(result);
     })
 
     // Send a ping to confirm a successful connection
@@ -59,3 +69,18 @@ app.get('/', (req, res) =>{
 app.listen(port, () => {
     console.log(`Shop is setting ${port}`)
 })
+
+/* 
+*------------------------
+     NAMING CONVENBTION
+-------------------------
+users : userCollection]
+
+app.get('/users')
+app.get('/users/:id')
+app.post('/users')
+app.patch('/users/:id')
+app.put('/users/:id')
+app.delete('/users/:id')
+
+*/
