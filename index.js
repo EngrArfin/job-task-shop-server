@@ -40,6 +40,21 @@ async function run() {
         res.send(result);
     })
 
+
+
+
+/* Cab Data Collection api for cab button in navBar */
+    app.get('/cabs', async(req, res) => {
+        const email = req.query.email;
+        console.log(email);
+        if(!email){
+          res.send([]);
+        }
+        const query = {email: email};
+        const result = await cabCategoryColletion.find(query).toArray();
+        res.send(result);
+    });
+
 /* Cab Data Collection For next page */
 
     app.post('/cabs', async(req, res) =>{
