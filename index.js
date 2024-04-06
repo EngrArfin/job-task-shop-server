@@ -10,6 +10,8 @@ app.use(express.json());
 
 
 const { MongoClient, ServerApiVersion } = require('mongodb');
+/* const res = require('express/lib/response'); 
+const { configDotenv } = require('dotenv'); */
 const uri = `mongodb+srv://${process.env.SK_User}:${process.env.SK_Pass}@cluster0.xu7sm0d.mongodb.net/?retryWrites=true&w=majority`;
 
 // Create a MongoClient with a MongoClientOptions object to set the Stable API version
@@ -23,13 +25,23 @@ const client = new MongoClient(uri, {
 
 async function run() {
   try {
+    
     // Connect the client to the server	(optional starting in v4.7)
     await client.connect();
 
+    const usersColletion = client.db("productSP").collection("users");
     const productColletion = client.db("productSP").collection("product");
     const productCategoryColletion = client.db("productSP").collection("productCategory");
-    const cabCategoryColletion = client.db("productSP").collection("cabs");
+    const cabColletion = client.db("productSP").collection("cabs");
     
+    //users api
+    app.post('/users', async(req, res) =>{
+      const user = req.body;
+      const result = await cabColletion.insertOne(user);
+      res.send(result);
+    })
+
+
     app.get('/product', async(req, res) =>{
         const result = await productColletion.find().toArray();
         res.send(result);
@@ -40,29 +52,35 @@ async function run() {
         res.send(result);
     })
 
-
-
-
 /* Cab Data Collection api for cab button in navBar */
     app.get('/cabs', async(req, res) => {
         const email = req.query.email;
-        console.log(email);
+        
         if(!email){
-          res.send([]);
+          res.send([]);         
         }
+
         const query = {email: email};
-        const result = await cabCategoryColletion.find(query).toArray();
+        const result = await cabColletion.find(query).toArray();
         res.send(result);
     });
 
-/* Cab Data Collection For next page */
 
+/* Cab Data Collection For next page */
     app.post('/cabs', async(req, res) =>{
       const item = req.body;
-      console.log(item);
-      const result = await cabCategoryColletion.insertOne(item);
+      const result = await cabColletion.insertOne(item);
       res.send(result);
     })
+
+    app.delete('/cabs/:id', async(req, res) => {
+      const id = req.params.id;
+      const query = {_id: new ObjectId(id)};
+      const result = await cabColletion.deleteOne(query);
+      res.send(result);
+      
+    })
+
 
     // Send a ping to confirm a successful connection
     await client.db("admin").command({ ping: 1 });
