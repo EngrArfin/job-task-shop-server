@@ -51,9 +51,24 @@ async function run() {
       const result = await usersColletion.insertOne(user);
       res.send(result);
     });
+/* 
+Admin: 1
+Name: Admin191
+Email: admin191@gmail.com
+Pass Admin191@ 
+Admin: 2
+Name: Admin192
+Email: admin192@gmail.com
+Pass Admin192@
+Admin: 3
+Name: Engr S Arfin
+Email: arfin.cse.green.edu.bd@gmail.com
+Pass Anarfinb12984@$
 
-    app.patch('users/admin/:id', async(req, res) => {
-      const id =req.params.id;
+
+*/
+    app.patch('/users/admin/:id', async(req, res) => {
+      const id =req.params.id; 
       const filter = {_id: new ObjectId(id) };
       const updateDoc = {
         $set: {
