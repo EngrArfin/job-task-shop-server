@@ -38,7 +38,7 @@ async function run() {
     app.get('/users', async(req, res) =>{
       const result = await usersColletion.find().toArray();
       res.send(result);
-    })
+    });
 
     app.post('/users', async (req, res) => {
       const user = req.body;
@@ -49,6 +49,18 @@ async function run() {
         return res.send({message: 'user already exist'})
       }
       const result = await usersColletion.insertOne(user);
+      res.send(result);
+    });
+
+    app.patch('users/admin/:id', async(req, res) => {
+      const id =req.params.id;
+      const filter = {_id: new ObjectId(id) };
+      const updateDoc = {
+        $set: {
+          role: 'admin'
+        },
+      };
+      const result = await usersColletion.updateOne(filter, updateDoc);
       res.send(result);
     })
 
