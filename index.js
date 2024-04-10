@@ -66,6 +66,18 @@ Email: arfin.cse.green.edu.bd@gmail.com
 Pass Anarfinb12984@$
 
 
+
+Users: 1
+Name: Arfinmia191
+Email: arfinmia191@gmail.com
+Pass Arfinmia191@
+
+Users: 2
+Name: Arfinmia192
+Email: arfinmia192@gmail.com
+Pass Arfinmia192@
+
+
 */
     app.patch('/users/admin/:id', async(req, res) => {
       const id =req.params.id; 
@@ -78,6 +90,17 @@ Pass Anarfinb12984@$
       const result = await usersColletion.updateOne(filter, updateDoc);
       res.send(result);
     })
+
+    /* Delete Users From database */
+    app.delete('/users/:id', async (req, res) => {
+      const id = req.params.id;
+      const query = { _id: new ObjectId(id) };
+      const result = await usersColletion.deleteOne(query);
+      res.send(result);
+
+    })
+
+
 
     app.get('/product', async (req, res) => {
       const result = await productColletion.find().toArray();
