@@ -8,9 +8,7 @@ const port = process.env.PORT || 5000;
 app.use(cors());
 app.use(express.json());
 
-
 const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
-
 const res = require('express/lib/response');
 const { configDotenv } = require('dotenv');
 const uri = `mongodb+srv://${process.env.SK_User}:${process.env.SK_Pass}@cluster0.xu7sm0d.mongodb.net/?retryWrites=true&w=majority`;
@@ -29,26 +27,26 @@ async function run() {
     // Connect the client to the server	(optional starting in v4.7)
     await client.connect();
 
-    const usersColletion = client.db("productSP").collection("users");
+    const usersCollection = client.db("productSP").collection("users");
     const productColletion = client.db("productSP").collection("product");
     const productCategoryColletion = client.db("productSP").collection("productCategory");
     const cabColletion = client.db("productSP").collection("cabs");
 
     //users api
     app.get('/users', async(req, res) =>{
-      const result = await usersColletion.find().toArray();
+      const result = await usersCollection.find().toArray();
       res.send(result);
     });
 
     app.post('/users', async (req, res) => {
       const user = req.body;
       const query = { email: user.email }
-      const existingUser = await usersColletion.findOne(query);
+      const existingUser = await usersCollection.findOne(query);
 
       if(existingUser){
         return res.send({message: 'user already exist'})
       }
-      const result = await usersColletion.insertOne(user);
+      const result = await usersCollection.insertOne(user);
       res.send(result);
     });
 /* 
@@ -79,6 +77,7 @@ Pass Arfinmia192@
 
 
 */
+
     app.patch('/users/admin/:id', async(req, res) => {
       const id =req.params.id; 
       const filter = {_id: new ObjectId(id) };
@@ -87,7 +86,7 @@ Pass Arfinmia192@
           role: 'admin'
         },
       };
-      const result = await usersColletion.updateOne(filter, updateDoc);
+      const result = await usersCollection.updateOne(filter, updateDoc);
       res.send(result);
     })
 
@@ -95,7 +94,7 @@ Pass Arfinmia192@
     app.delete('/users/:id', async (req, res) => {
       const id = req.params.id;
       const query = { _id: new ObjectId(id) };
-      const result = await usersColletion.deleteOne(query);
+      const result = await usersCollection.deleteOne(query);
       res.send(result);
 
     })
@@ -151,14 +150,7 @@ Pass Arfinmia192@
 }
 run().catch(console.dir);
 
-app.get('/', (req, res) => {
-  res.send('shop task running')
-})
-
-app.listen(port, () => {
-  console.log(`Shop is setting ${port}`)
-})
-
+m 
 /* 
 *------------------------
      NAMING CONVENBTION
