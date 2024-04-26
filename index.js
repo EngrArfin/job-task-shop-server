@@ -1,12 +1,14 @@
 const express = require('express');
 const app = express();
 const cors = require('cors');
+const jwt = require('jsonwebtoken');
 require('dotenv').config()
 const port = process.env.PORT || 5000;
 
 //middleware
 app.use(cors());
 app.use(express.json());
+
 
 const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
 const res = require('express/lib/response');
@@ -32,6 +34,13 @@ async function run() {
     const productCategoryColletion = client.db("productSP").collection("productCategory");
     const cabColletion = client.db("productSP").collection("cabs");
 
+
+    app.post('/jwt',(req, res) =>{
+      const user = req.body;
+      const token = jwt.sign(user, process.env.ACCESS_TOKEN_SECRET, { expiresIn: '1h' })
+      res.send({ token})
+    })
+
     //users api
     app.get('/users', async(req, res) =>{
       const result = await usersCollection.find().toArray();
@@ -49,34 +58,6 @@ async function run() {
       const result = await usersCollection.insertOne(user);
       res.send(result);
     });
-/* 
-Admin: 1
-Name: Admin191
-Email: admin191@gmail.com
-Pass Admin191@ 
-Admin: 2
-Name: Admin192
-Email: admin192@gmail.com
-Pass Admin192@
-Admin: 3
-Name: Engr S Arfin
-Email: arfin.cse.green.edu.bd@gmail.com
-Pass Anarfinb12984@$
-
-
-
-Users: 1
-Name: Arfinmia191
-Email: arfinmia191@gmail.com
-Pass Arfinmia191@
-
-Users: 2
-Name: Arfinmia192
-Email: arfinmia192@gmail.com
-Pass Arfinmia192@
-
-
-*/
 
     app.patch('/users/admin/:id', async(req, res) => {
       const id =req.params.id; 
@@ -98,8 +79,6 @@ Pass Arfinmia192@
       res.send(result);
 
     })
-
-
 
     app.get('/product', async (req, res) => {
       const result = await productColletion.find().toArray();
@@ -144,13 +123,19 @@ Pass Arfinmia192@
     // Ensures that the client will close when you finish/error
     //await client.close();
 
-
-
   }
 }
 run().catch(console.dir);
 
-m 
+app.get('/', (req, res) => {
+  res.send('Shop is sitting!')
+})
+
+app.listen(port, () => {
+  console.log(`Shop is setting ${port}`)
+})
+
+
 /* 
 *------------------------
      NAMING CONVENBTION
