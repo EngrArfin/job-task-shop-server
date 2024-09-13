@@ -3,37 +3,14 @@ const app = express();
 const cors = require("cors");
 const jwt = require("jsonwebtoken");
 require("dotenv").config();
-/* 
-const res = require("express/lib/response");
-const { configDotenv } = require("dotenv"); */
+
 const port = process.env.PORT || 5000;
 
-//middleware
+// Middleware
 app.use(cors());
 app.use(express.json());
 
-/* const verifyJWT = (req, res, next) => {
-  const authorization = req.headers.authorization;
-  if (!authorization) {
-    return res
-      .status(401)
-      .send({ error: true, message: "unauthorization access" });
-  }
-  //bearer token
-  const token = authorization.split("")[1];
-
-  jwt.verify(token, process.env.ACCESS_TOKEN_SECRET, (err, decoded) => {
-    if (err) {
-      return res
-        .status(401)
-        .send({ error: true, message: "unauthorized access" });
-    }
-    req.decoded = decoded;
-    next();
-  });
-}; */
-
-const { MongoClient, ServerApiVersion, ObjectId, Admin } = require("mongodb");
+const { MongoClient, ServerApiVersion, ObjectId } = require("mongodb");
 const uri = `mongodb+srv://${process.env.SK_User}:${process.env.SK_Pass}@cluster0.xu7sm0d.mongodb.net/?retryWrites=true&w=majority`;
 
 // Create a MongoClient with a MongoClientOptions object to set the Stable API version
@@ -47,46 +24,21 @@ const client = new MongoClient(uri, {
 
 async function run() {
   try {
-    // Connect the client to the server	(optional starting in v4.7)
+    // Connect the client to the server (optional starting in v4.7)
     await client.connect();
 
     const usersCollection = client.db("productSP").collection("users");
-    const productColletion = client.db("productSP").collection("product");
-    const productCategoryColletion = client
+    const productCollection = client.db("productSP").collection("product"); // Corrected the variable name
+    const productCategoryCollection = client
       .db("productSP")
       .collection("productCategory");
-    const cabColletion = client.db("productSP").collection("cabs");
+    const cabCollection = client.db("productSP").collection("cabs");
 
-    //jwt token
-    /* app.post("/jwt", (req, res) => {
-      const user = req.body;
-      const token = jwt.sign(user, process.env.ACCESS_TOKEN_SECRET, {
-        expiresIn: "1h",
-      });
-      res.send({ token });
-    }); */
-
-    //verifyAdmin
-    /*  const verifyAdmin = async (req, res, next) => {
-      const email = req.decoded.email;
-      const query = { email: email };
-      const user = await usersCollection.findOne(query);
-      if (user?.role !== "admin") {
-        return res
-          .status(403)
-          .send({ error: true, message: "forbidden message" });
-      }
-      next();
-    }; */
-
-    //users api
-    app.get(
-      "/users",
-      /*  verifyJWT, verifyAdmin, */ async (req, res) => {
-        const result = await usersCollection.find().toArray();
-        res.send(result);
-      }
-    );
+    // Users API
+    app.get("/users", async (req, res) => {
+      const result = await usersCollection.find().toArray();
+      res.send(result);
+    });
 
     app.post("/users", async (req, res) => {
       const user = req.body;
@@ -94,19 +46,15 @@ async function run() {
       const existingUser = await usersCollection.findOne(query);
 
       if (existingUser) {
-        return res.send({ message: "user already exist" });
+        return res.send({ message: "User already exists" });
       }
       const result = await usersCollection.insertOne(user);
       res.send(result);
     });
 
-    //admin
+    // Admin API
     app.patch("/users/admin/:email", async (req, res) => {
-      const id = req.params.email;
-
-      if (req.decoded.email !== email) {
-        req.send({ admin: false });
-      }
+      const email = req.params.email;
       const query = { email: email };
       const user = await usersCollection.findOne(query);
       const result = { admin: user?.role === "admin" };
@@ -125,7 +73,7 @@ async function run() {
       res.send(result);
     });
 
-    /* Delete Users From database */
+    // Delete Users From Database
     app.delete("/users/:id", async (req, res) => {
       const id = req.params.id;
       const query = { _id: new ObjectId(id) };
@@ -133,49 +81,53 @@ async function run() {
       res.send(result);
     });
 
+    // Product API
     app.get("/product", async (req, res) => {
-      const result = await productColletion.find().toArray();
+      const result = await productCollection.find().toArray();
       res.send(result);
     });
 
-    app.get("/productCategory", async (req, res) => {
-      const result = await productCategoryColletion.find().toArray();
-      res.send(result);
-    });
-
-    /* Cab Data Collection api for cab button in navBar */
-    app.get(
-      "/cabs",
-      /* verifyJWT, */ async (req, res) => {
-        const email = req.query.email;
-        if (!email) {
-          res.send([]);
-        }
-
-        /*  const decodedEmail = req.decoded.email;
-        if (!email) {
-          return res
-            .status(403)
-            .send({ error: true, message: "forbided access" });
-        }
- */
-        const query = { email: email };
-        const result = await cabColletion.find(query).toArray();
+    app.post("/product", async (req, res) => {
+      try {
+        const newItem = req.body;
+        console.log("Received new product data:", newItem); // Logging the received data
+        const result = await productCollection.insertOne(newItem);
         res.send(result);
+      } catch (error) {
+        console.error("Failed to add product:", error); // Logging the error
+        res.status(500).send({ message: "Failed to add product", error });
       }
-    );
+    });
 
-    /* Cab Data Collection For next page */
+    // Product Category API
+    app.get("/productCategory", async (req, res) => {
+      const result = await productCategoryCollection.find().toArray();
+      res.send(result);
+    });
+
+    // Cab Data Collection API for cab button in navBar
+    app.get("/cabs", async (req, res) => {
+      const email = req.query.email;
+      if (!email) {
+        res.send([]);
+      }
+
+      const query = { email: email };
+      const result = await cabCollection.find(query).toArray();
+      res.send(result);
+    });
+
+    // Cab Data Collection For next page
     app.post("/cabs", async (req, res) => {
       const item = req.body;
-      const result = await cabColletion.insertOne(item);
+      const result = await cabCollection.insertOne(item);
       res.send(result);
     });
 
     app.delete("/cabs/:id", async (req, res) => {
       const id = req.params.id;
       const query = { _id: new ObjectId(id) };
-      const result = await cabColletion.deleteOne(query);
+      const result = await cabCollection.deleteOne(query);
       res.send(result);
     });
 
@@ -186,24 +138,24 @@ async function run() {
     );
   } finally {
     // Ensures that the client will close when you finish/error
-    //await client.close();
+    // await client.close();
   }
 }
 run().catch(console.dir);
 
 app.get("/", (req, res) => {
-  res.send("Shop is sitting!");
+  res.send("ARA Fash Electronic Zone is sitting!");
 });
 
 app.listen(port, () => {
-  console.log(`Shop is setting ${port}`);
+  console.log(`ARA Fash Electronic Zone is setting ${port}`);
 });
 
 /* 
 *------------------------
-     NAMING CONVENBTION
+     NAMING CONVENTION
 -------------------------
-users : userCollection]
+users : userCollection
 
 app.get('/users')
 app.get('/users/:id')
