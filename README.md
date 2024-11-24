@@ -1,8 +1,19 @@
 # Job Task Shop Server
-# job-task-shop-server
 
 This is the backend for the **Job Task Shop** e-commerce website. It is built using **Node.js**, **Express**, and **JavaScript**. The server handles product management, user authentication, shopping carts, and order processing through RESTful APIs.
-live serverr: https://sar-shop-server.vercel.app/
+
+
+
+-----------------Live Github Link----------------
+
+Frontend (Live link):  https://job-task-6e505.web.app
+
+Backend Live link: https://sar-shop-server.vercel.app
+
+Git Client : https://github.com/EngrArfin/job-task-shop-client
+
+Git Server : https://github.com/EngrArfin/job-task-shop-server
+
 ## Features
 
 - User Authentication (Login/Signup)
