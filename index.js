@@ -25,7 +25,7 @@ const client = new MongoClient(uri, {
 async function run() {
   try {
     // Connect the client to the server (optional starting in v4.7)
-    await client.connect();
+    //await client.connect();
 
     const usersCollection = client.db("productSP").collection("users");
     const productCollection = client.db("productSP").collection("product"); // Corrected the variable name
@@ -108,11 +108,10 @@ async function run() {
     // Cab Data Collection API for cab button in navBar
     app.get("/cabs", async (req, res) => {
       const email = req.query.email;
-      if (!email) {
-        res.send([]);
-      }
 
-      const query = { email: email };
+      // If email is provided, filter by email; otherwise, return all cabs
+      const query = email ? { email: email } : {};
+
       const result = await cabCollection.find(query).toArray();
       res.send(result);
     });
@@ -132,10 +131,10 @@ async function run() {
     });
 
     // Send a ping to confirm a successful connection
-    await client.db("admin").command({ ping: 1 });
+    /* await client.db("admin").command({ ping: 1 });
     console.log(
       "Pinged your deployment. You successfully connected to MongoDB!"
-    );
+    ); */
   } finally {
     // Ensures that the client will close when you finish/error
     // await client.close();
