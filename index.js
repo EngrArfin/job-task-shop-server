@@ -4,6 +4,8 @@ const cors = require("cors");
 const jwt = require("jsonwebtoken");
 require("dotenv").config();
 
+const stripe = require("stripe")(process.env.STRIPE_SECRET_KEY);
+
 const port = process.env.PORT || 5000;
 
 // Middleware
@@ -13,7 +15,6 @@ app.use(express.json());
 const { MongoClient, ServerApiVersion, ObjectId } = require("mongodb");
 const uri = `mongodb+srv://${process.env.SK_User}:${process.env.SK_Pass}@cluster0.xu7sm0d.mongodb.net/?retryWrites=true&w=majority`;
 
-// Create a MongoClient with a MongoClientOptions object to set the Stable API version
 const client = new MongoClient(uri, {
   serverApi: {
     version: ServerApiVersion.v1,
@@ -34,7 +35,6 @@ async function run() {
       .collection("productCategory");
     const cabCollection = client.db("productSP").collection("cabs");
 
-    // Users API
     app.get("/users", async (req, res) => {
       const result = await usersCollection.find().toArray();
       res.send(result);
@@ -52,7 +52,6 @@ async function run() {
       res.send(result);
     });
 
-    // Admin API
     app.patch("/users/admin/:email", async (req, res) => {
       const email = req.params.email;
       const query = { email: email };
@@ -99,24 +98,19 @@ async function run() {
       }
     });
 
-    // Product Category API
     app.get("/productCategory", async (req, res) => {
       const result = await productCategoryCollection.find().toArray();
       res.send(result);
     });
 
-    // Cab Data Collection API for cab button in navBar
     app.get("/cabs", async (req, res) => {
       const email = req.query.email;
 
-      // If email is provided, filter by email; otherwise, return all cabs
       const query = email ? { email: email } : {};
-
       const result = await cabCollection.find(query).toArray();
       res.send(result);
     });
 
-    // Cab Data Collection For next page
     app.post("/cabs", async (req, res) => {
       const item = req.body;
       const result = await cabCollection.insertOne(item);
@@ -128,6 +122,20 @@ async function run() {
       const query = { _id: new ObjectId(id) };
       const result = await cabCollection.deleteOne(query);
       res.send(result);
+    });
+
+    app.post("/create-payment-intent", async (req, res) => {
+      const { price } = req.body;
+      const amount = parseInt(price * 100);
+
+      const paymentIntent = await stripe.paymentIntents.create({
+        amount: amount,
+        currency: "usd",
+        payment_method_type: ["card"],
+      });
+      res.send({
+        clientSecret: paymentIntent.client_secret,
+      });
     });
 
     // Send a ping to confirm a successful connection
